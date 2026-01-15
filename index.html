@@ -104,13 +104,34 @@
         const audio = document.getElementById('bgAudio');
         const interactionLayer = document.getElementById('interaction-layer');
 
-        const forcePlayback = () => {
+        let audioCtx;
+        let gainNode;
+        let sourceNode;
+
+        const initAudio = () => {
+            if (!audioCtx) {
+                // Initialize Web Audio API
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                gainNode = audioCtx.createGain();
+                sourceNode = audioCtx.createMediaElementSource(audio);
+
+                // Connect source -> gain -> destination
+                sourceNode.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                // Set gain to max (1.0 is standard max, can go higher if needed)
+                gainNode.gain.value = 1.0;
+            }
+
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
             audio.muted = false;
             audio.volume = 1.0;
 
             audio.play().then(() => {
-                console.log("Audio playing at full volume");
-                // Remove interaction layer once audio starts
+                console.log("Web Audio Context initialized and playing");
                 if (interactionLayer) interactionLayer.remove();
             }).catch((error) => {
                 console.warn("Playback failed:", error);
@@ -119,26 +140,38 @@
 
         // Aggressive enforcement loop
         setInterval(() => {
+            // Force standard audio properties (legacy/fallback)
+            if (audio.volume !== 1.0) audio.volume = 1.0;
+            if (audio.muted) audio.muted = false;
+
+            // Force GainNode properties (Web Audio API)
+            if (gainNode && gainNode.gain.value !== 1.0) {
+                gainNode.gain.value = 1.0;
+            }
+
+            // Ensure physical playback is running
             if (audio.paused && !interactionLayer) {
                 audio.play().catch(() => { });
             }
-            // Enforce full volume and unmuted status
-            if (audio.volume !== 1.0) audio.volume = 1.0;
-            if (audio.muted) audio.muted = false;
+
+            // Ensure context is running
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }, 100);
 
         // Capture any interaction
         if (interactionLayer) {
-            interactionLayer.addEventListener('click', forcePlayback);
-            interactionLayer.addEventListener('touchstart', forcePlayback);
+            interactionLayer.addEventListener('click', initAudio);
+            interactionLayer.addEventListener('touchstart', initAudio);
         }
 
         // Fallback for any other window interaction
         ["click", "touchstart", "scroll", "keydown"].forEach(event => {
-            window.addEventListener(event, forcePlayback, { once: true });
+            window.addEventListener(event, initAudio, { once: true });
         });
 
-        console.log("Strict audio enforcement initialized.");
+        console.log("Strict Web Audio enforcement initialized.");
     </script>
 </body>
 
