@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Document</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+
+
+
+    <div class="flag">
+
+        <div class="stripe saffron"></div>
+
+
+        <div class="stripe white">
+
+            <div class="login-box">
+
+                <h2>LOGIN</h2>
+
+                <input type="text" placeholder="Username">
+
+                <input type="password" placeholder="Password">
+
+                <button>SIGN IN</button>
+
+                <p><a href="#">Forgot Password?</a></p>
+
+                <p>Don’t have an account? <a href="#">Register</a></p>
+
+            </div>
+
+
+            <div class="chakra-wrapper">
+
+                <div class="chakra">
+
+                    <script>
+
+                        for (let i = 0; i < 24; i++) {
+
+                            document.write(
+
+                                `<div class="spoke" style="transform: rotate(${i * 15}deg);"></div>`
+
+                            );
+
+                        }
+
+                    </script>
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <img src="ganghi ji.png" alt="">
+
+            </div>
+
+        </div>
+
+
+
+        <div class="stripe green"></div>
+
+    </div>
+
+    <!-- Patriotic Song Audio -->
+    <audio id="bgAudio" loop>
+        <source id="audioSrc" src="song.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        const audio = document.getElementById('bgAudio');
+        const source = document.getElementById('audioSrc');
+
+        // Log if there's an error loading the file
+        source.addEventListener('error', () => {
+            console.error("Audio source failed to load. Check if 'song.mp3' is in the same folder as 'index.html'.");
+        });
+
+        const startAudio = () => {
+            if (audio.paused) {
+                audio.play().then(() => {
+                    console.log("Audio playing successfully");
+                    // Remove listeners once playing
+                    ["click", "touchstart", "scroll", "keydown", "mousedown"].forEach(event => {
+                        window.removeEventListener(event, startAudio);
+                    });
+                }).catch((error) => {
+                    console.warn("Autoplay still blocked or failed:", error.message);
+                });
+            }
+        };
+
+        // Try to play on load
+        window.addEventListener('load', startAudio);
+
+        // Fallback for browser autoplay policies
+        ["click", "touchstart", "scroll", "keydown", "mousedown"].forEach(event => {
+            window.addEventListener(event, startAudio);
+        });
+
+        // Debug log to confirm script reached
+        console.log("Audio script initialized. Waiting for user interaction or load completion.");
+    </script>
+</body>
+
+
+</html>
